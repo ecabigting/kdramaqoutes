@@ -25,6 +25,17 @@ export default auth(async (req) => {
   // if (isAdminRoute && cUser?.user.role !== UserRole.ADMIN) {
   //   return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
   // }
+  //
+  // if (!isLoggedIn && !isPublicRoute) {
+  //   return Response.redirect(new URL("/", nextUrl));
+  // }
+  // return;
+
+
+  // Allow auth-related routes to proceed
+  if (nextUrl.pathname.startsWith("/api/auth")) {
+    return;
+  }
 
   if (!isLoggedIn && !isPublicRoute) {
     return Response.redirect(new URL("/", nextUrl));

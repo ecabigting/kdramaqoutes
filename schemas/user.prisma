@@ -4,19 +4,20 @@ model User {
   email         String          @unique
   emailVerified DateTime?
   image         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  isEnabled     Boolean         @default(true) // Enabled by default
+  enabledBy     String? // Who enabled the user
+  enabledAt     DateTime        @default(now())
+  disabledBy    String? // Who disabled the user
+  disabledAt    DateTime? // When the user was disabled
   accounts      Account[]
-  sessions      Session[]
-  isEnabled     Boolean
-  isEnabledBy   String?
-  isEnabledDate DateTime?
-  // Optional for WebAuthn support
   Authenticator Authenticator[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  sessions      Session[]
 }
 
 model Account {
+  id                String   @id @default(cuid()) // Primary key for Xata
   userId            String
   type              String
   provider          String
@@ -28,34 +29,31 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([provider, providerAccountId])
+  @@unique([provider, providerAccountId]) // Replace @@id with @@unique
 }
 
 model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model VerificationToken {
+  id         String   @id @default(cuid()) // Primary key for Xata
   identifier String
   token      String
   expires    DateTime
 
-  @@id([identifier, token])
+  @@unique([identifier, token])
 }
 
-// Optional for WebAuthn support
 model Authenticator {
   credentialID         String  @unique
   userId               String
@@ -65,8 +63,7 @@ model Authenticator {
   credentialDeviceType String
   credentialBackedUp   Boolean
   transports           String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, credentialID])
 }
