@@ -1,0 +1,16 @@
+model Qoutes {
+  id         String    @id @default(cuid())
+  qoutes     String
+  totalLikes Int       @default(0)
+  authorName String?
+  image      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  isEnabled  Boolean   @default(true) // Enabled by default
+  enabledBy  String? // Who enabled the user
+  enabledAt  DateTime  @default(now())
+  disabledBy String? // Who disabled the user
+  disabledAt DateTime? // When the user was disabled
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
