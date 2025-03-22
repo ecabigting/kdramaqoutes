@@ -1,13 +1,34 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
+import { submitQoute } from "../../actions/qoutes";
 
 export default function AddQuoteButton() {
   const { data: session } = useSession();
   const [isFormVisible, setFormVisible] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   if (!session) return null; // Only show if logged in
+
+  const handleSubmit = async (formData: FormData) => {
+    const qoute = formData.get("qoute") as string;
+    if (!qoute || qoute.length > 200) {
+      setError("Qoute must be less than 200 characters and not empty.")
+      return
+    }
+
+    startTransition(async () => {
+      try {
+        await submitQoute(qoute)
+        setFormVisible(false)
+        setError(null)
+      } catch (error) {
+        setError(error as string)
+      }
+    })
+  }
 
   return (
     <>
@@ -45,32 +66,33 @@ export default function AddQuoteButton() {
             </button>
 
             {/* Form Content */}
-            <h2 className="text-xl font-bold mb-4 text-background">Add TV Quote</h2>
+            <h2 className="text-xl font-bold mb-4 text-background">KDrama Quote</h2>
             <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                // Handle form submission
-                setFormVisible(false);
-              }}
+              action={handleSubmit}
             >
               <textarea
+                name="qoute"
+                disabled={isPending}
                 placeholder="Enter your TV quote (max 200 characters)..."
                 className="w-full p-2 border rounded mb-4 text-background"
                 rows={4}
                 maxLength={200} // Limit to 200 characters
                 required
               />
+              {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
               <button
                 type="submit"
                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                disabled={isPending}
               >
-                Submit
+                {isPending ? "Submitting.." : "Submit"}
               </button>
             </form>
           </div>
 
-        </div>
-      )}
+        </div >
+      )
+      }
     </>
   );
 }
