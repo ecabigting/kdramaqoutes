@@ -4,7 +4,7 @@ import { auth } from "@/auth"
 import { createQoute } from "../data/qoutes"
 import { revalidatePath } from "next/cache"
 
-export async function submitQoute(qoute: string) {
+export async function submitQoute(qoute: string, showTitle: string, characterName: string, showImage: string) {
   const session = await auth()
 
   if (!session || !session.user?.id) {
@@ -15,8 +15,19 @@ export async function submitQoute(qoute: string) {
     throw new Error("Qoute must not be empty at less than 200 characters.")
   }
 
+  if (!showTitle || !characterName) {
+    throw new Error("Show Title and Character Name are required.")
+  }
+
   try {
-    await createQoute({ qoutes: qoute, userId: session.user.id, authorName: session.user.name, image: "" })
+    await createQoute({
+      qoutes: qoute,
+      userId: session.user.id,
+      authorName: session.user.name,
+      image: showImage,
+      showTitle: showTitle,
+      characterName: characterName
+    })
     revalidatePath("/")
   } catch (error) {
     throw new Error(`Failed to submit qoute:${error}`)

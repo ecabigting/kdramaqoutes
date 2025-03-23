@@ -5,7 +5,9 @@ export async function createQoute(qouteData: {
   qoutes: string,
   userId: string,
   authorName?: string,
-  image?: string,
+  image: string,
+  showTitle: string,
+  characterName: string
 }) {
 
   return await db.qoutes.create({
@@ -14,6 +16,7 @@ export async function createQoute(qouteData: {
       enabledBy: qouteData.userId,
       isEnabled: true,
       userId: qouteData.userId,
+      image: qouteData.image
     }
   })
 }
