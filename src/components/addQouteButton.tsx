@@ -166,11 +166,11 @@ export default function AddQuoteButton() {
       {/* Form Modal */}
       {isFormVisible && (
         <div className="fixed inset-0 bg-transparent flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-96 relative">
             {/* Close Button */}
             <button
               onClick={() => setFormVisible(false)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              className="absolute top-2 right-2 text-gray-300 hover:text-purple-400"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -189,7 +189,7 @@ export default function AddQuoteButton() {
             </button>
 
             {/* Form Content */}
-            <h2 className="text-xl font-bold mb-4 text-background">Add A Quote</h2>
+            <h2 className="text-xl font-bold mb-4 text-purple-400">Add A Quote</h2>
             <form
               onSubmit={handleSubmit}
             >
@@ -199,7 +199,7 @@ export default function AddQuoteButton() {
                   <input
                     type="text"
                     placeholder="Search TV Show"
-                    className="w-full p-2 border rounded text-background"
+                    className="w-full p-2 border rounded bg-gray-700 text-white placeholder-gray-400"
                     value={showTitle}
                     onChange={(e) => {
                       setShowTitle(e.target.value);
@@ -210,14 +210,18 @@ export default function AddQuoteButton() {
                   />
                 </div>
                 {tvShows.length > 0 || tvShowsLoading ? (
-                  <ul className="absolute mt-1 z-10 bg-white border rounded shadow p-1 w-[90%]">
+                  <ul
+                    className="absolute mt-1 z-10 bg-gray-700 border border-gray-600 rounded shadow-lg p-1 w-[90%] text-white"
+                  >
                     {tvShowsLoading ? (
-                      <li className="p-2 text-center text-background">Fetching shows...</li>
+                      <li
+                        className="p-2 text-center text-gray-300"
+                      >Fetching shows...</li>
                     ) : (
                       tvShows.map((show) => (
                         <li
                           key={show.id}
-                          className="p-2 hover:bg-gray-100 cursor-pointer text-background"
+                          className="p-2 hover:bg-gray-600 cursor-pointer text-white transition-colors"
                           onClick={() => {
                             setSelectedTvShow(show);
                             const showTitleWithYear = `${show.translations.eng} (${show.year}) `;
@@ -252,7 +256,7 @@ export default function AddQuoteButton() {
                   <input
                     type="text"
                     placeholder="Search Character"
-                    className="w-full p-2 border rounded text-background"
+                    className="w-full p-2 border rounded bg-gray-700 text-white placeholder-gray-400"
                     value={characterName}
                     onChange={(e) => {
                       setCharacterName(e.target.value);
@@ -261,14 +265,18 @@ export default function AddQuoteButton() {
                   />
                 </div>
                 {characters.length > 0 || charactersLoading ? (
-                  <ul className="absolute p-1 mt-1 z-10 bg-white border rounded shadow w-[90%]">
+                  <ul
+                    className="absolute mt-1 z-10 bg-gray-700 border border-gray-600 rounded shadow-lg p-1 w-[90%] text-white"
+                  >
                     {charactersLoading ? (
-                      <li className="p-2 text-center text-background">Loading...</li>
+                      <li
+                        className="p-2 text-center text-gray-300"
+                      >Loading...</li>
                     ) : (
                       characters.map((character) => (
                         <li
                           key={character.id}
-                          className="p-2 hover:bg-gray-100 cursor-pointer text-background"
+                          className="p-2 hover:bg-gray-600 cursor-pointer text-white transition-colors"
                           onClick={() => {
                             const fullCharName = `${character.name} (${character.personName})`;
                             setCharacterName(fullCharName);
@@ -278,7 +286,7 @@ export default function AddQuoteButton() {
                           <div className="flex items-center justify-start">
                             <Image
                               src={character.image}
-                              className="rounded-full w-10 h-10 object-cover"
+                              className="rounded-full w-10 h-10 object-cover border border-purple-400"
                               alt={character.name}
                               width={25}
                               height={25}
@@ -299,7 +307,7 @@ export default function AddQuoteButton() {
                 name="qoute"
                 disabled={isPending}
                 placeholder="Enter your TV quote (max 200 characters)..."
-                className="w-full p-2 border rounded mb-4 text-background"
+                className="w-full p-2 border rounded bg-gray-700 text-white placeholder-gray-400"
                 rows={4}
                 maxLength={200} // Limit to 200 characters
                 required

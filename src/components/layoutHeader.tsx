@@ -24,10 +24,10 @@ export default function LayoutHeader() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   return (
-    <header className="flex justify-between items-center p-4 text-white">
+    <header className="flex justify-between items-center p-4 text-white bg-gray-800">
       {/* Logo */}
       <Link href="/" className="text-xl font-bold">
-        kdramaQoutes
+        KDramaQoutes
       </Link>
 
       {/* Auth Section */}
