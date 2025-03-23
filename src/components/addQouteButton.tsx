@@ -5,11 +5,14 @@ import { useSession } from "next-auth/react";
 import { submitQoute } from "../../actions/qoutes";
 import { fetchCharacters, fetchShows } from "../../data/tvdb";
 import { useDebounce } from "@/hooks/useDebounce";
+import Image from "next/image";
 
 export default function AddQuoteButton() {
   const { data: session } = useSession();
   const [isFormVisible, setFormVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tvShowsLoading, setTvShowsLoading] = useState(false);
+  const [charactersLoading, setCharactersLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   // Form Inputs States
@@ -41,46 +44,69 @@ export default function AddQuoteButton() {
     [selectedTvShow]
   );
 
-  // Fetch TV shows when debouncedShowTitle changes
+  // Fetch TV shows when debouncedShowTitle changes, but only if no show is selected
   useEffect(() => {
-    let isActive = true; // Flag to prevent state updates on unmounted component
+    if (selectedTvShow) return;
+
+    let isActive = true; // Prevent state updates on unmounted component
 
     const searchTvShows = async () => {
+      if (isActive) setTvShowsLoading(true);
       if (debouncedShowTitle.length >= 3) {
         try {
           const shows = await fetchShows(debouncedShowTitle);
-          if (isActive) setTvShows(shows);
+          if (isActive) {
+            setTvShows(shows);
+            setTvShowsLoading(false);
+          }
         } catch (error) {
-          console.log(error)
-          if (isActive) setError("Failed to fetch TV shows.");
+          console.log(error);
+          if (isActive) {
+            setError("Failed to fetch TV shows.");
+            setTvShowsLoading(false);
+          }
         }
       } else {
-        if (isActive) setTvShows([]);
+        if (isActive) {
+          setTvShows([]);
+          setTvShowsLoading(false);
+        }
       }
     };
 
     searchTvShows();
 
     return () => {
-      isActive = false; // Cleanup to avoid state updates after component unmounts
+      isActive = false;
     };
-  }, [debouncedShowTitle]);
+  }, [debouncedShowTitle, selectedTvShow]);
+
 
   // Fetch characters when debouncedCharacterName changes
   useEffect(() => {
     let isActive = true;
 
     const searchCharacters = async () => {
+      if (isActive) setCharactersLoading(true);
       if (selectedTvShow && debouncedCharacterName.length >= 3) {
         try {
           const characters = await fetchCharacters(selectedTvShow.id.split("-")[1], debouncedCharacterName);
-          if (isActive) setCharacters(characters);
+          if (isActive) {
+            setCharacters(characters);
+            setCharactersLoading(false);
+          }
         } catch (error) {
-          console.log(error)
-          if (isActive) setError("Failed to fetch characters.");
+          console.log(error);
+          if (isActive) {
+            setError("Failed to fetch characters.");
+            setCharactersLoading(false);
+          }
         }
       } else {
-        if (isActive) setCharacters([]);
+        if (isActive) {
+          setCharacters([]);
+          setCharactersLoading(false);
+        }
       }
     };
 
@@ -91,19 +117,8 @@ export default function AddQuoteButton() {
     };
   }, [debouncedCharacterName, selectedTvShow, handleCharacterSearch]);
 
+
   if (!session) return null; // Only show if logged in
-
-  const handleTvShowSearch = async (query: string) => {
-    if (query.length < 3) return; // Only search if the query is at least 3 characters long
-
-    try {
-      const shows = await fetchShows(query);
-      setTvShows(shows);
-    } catch (error) {
-      console.log(error)
-      setError("Failed to fetch TV shows.");
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,66 +195,103 @@ export default function AddQuoteButton() {
             >
               {/* TV Show Search */}
               <div className="mb-4">
-                <input
-                  type="text"
-                  placeholder="Search TV Show"
-                  className="w-full p-2 border rounded text-background"
-                  value={showTitle}
-                  onChange={(e) => {
-                    setShowTitle(e.target.value);
-                    handleTvShowSearch(e.target.value);
-                  }}
-                  disabled={isPending}
-                />
-                {tvShows.length > 0 && (
-                  <ul className="mt-2 border rounded">
-                    {tvShows.map((show) => (
-                      <li
-                        key={show.id}
-                        className="p-2 hover:bg-gray-100 cursor-pointer text-background"
-                        onClick={() => {
-                          setSelectedTvShow(show);
-                          setShowTitle(show.translations.eng);
-                          setShowImage(show.image_url)
-                          setTvShows([]); // Clear the dropdown
-                        }}
-                      >
-                        {show.translations.eng}
-                      </li>
-                    ))}
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search TV Show"
+                    className="w-full p-2 border rounded text-background"
+                    value={showTitle}
+                    onChange={(e) => {
+                      setShowTitle(e.target.value);
+                      // If user types after selecting a show, reset selection
+                      if (selectedTvShow) setSelectedTvShow(null);
+                    }}
+                    disabled={isPending}
+                  />
+                </div>
+                {tvShows.length > 0 || tvShowsLoading ? (
+                  <ul className="absolute mt-1 z-10 bg-white border rounded shadow p-1 w-[90%]">
+                    {tvShowsLoading ? (
+                      <li className="p-2 text-center text-background">Fetching shows...</li>
+                    ) : (
+                      tvShows.map((show) => (
+                        <li
+                          key={show.id}
+                          className="p-2 hover:bg-gray-100 cursor-pointer text-background"
+                          onClick={() => {
+                            setSelectedTvShow(show);
+                            const showTitleWithYear = `${show.translations.eng} (${show.year}) `;
+                            setShowTitle(showTitleWithYear);
+                            setShowImage(show.image_url);
+                            setTvShows([]); // Clear the dropdown
+                          }}
+                        >
+                          <div className="flex items-center justify-start">
+                            <Image
+                              src={show.image_url}
+                              className="rounded-sm"
+                              alt={show.translations.eng}
+                              width={50}
+                              height={100}
+                            />
+                            <p className="ml-2">
+                              {show.translations.eng} ({show.year})
+                            </p>
+                          </div>
+                        </li>
+                      ))
+                    )}
                   </ul>
-                )}
+                ) : null}
+
               </div>
 
               {/* Character Search */}
               <div className="mb-4">
-                <input
-                  type="text"
-                  placeholder="Search Character"
-                  className="w-full p-2 border rounded text-background"
-                  value={characterName}
-                  onChange={(e) => {
-                    setCharacterName(e.target.value);
-                    handleCharacterSearch(e.target.value);
-                  }}
-                  disabled={!selectedTvShow || isPending}
-                />
-                {characters.length > 0 && (
-                  <ul className="mt-2 border rounded">
-                    {characters.map((character) => (
-                      <li
-                        key={character.id}
-                        className="p-2 hover:bg-gray-100 cursor-pointer text-background"
-                        onClick={() => {
-                          setCharacterName(character.name);
-                          setCharacters([]); // Clear the dropdown
-                        }}
-                      >
-                        {character.name} ({character.personName})
-                      </li>
-                    ))}
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search Character"
+                    className="w-full p-2 border rounded text-background"
+                    value={characterName}
+                    onChange={(e) => {
+                      setCharacterName(e.target.value);
+                    }}
+                    disabled={!selectedTvShow || isPending}
+                  />
+                </div>
+                {characters.length > 0 || charactersLoading ? (
+                  <ul className="absolute p-1 mt-1 z-10 bg-white border rounded shadow w-[90%]">
+                    {charactersLoading ? (
+                      <li className="p-2 text-center text-background">Loading...</li>
+                    ) : (
+                      characters.map((character) => (
+                        <li
+                          key={character.id}
+                          className="p-2 hover:bg-gray-100 cursor-pointer text-background"
+                          onClick={() => {
+                            const fullCharName = `${character.name} (${character.personName})`;
+                            setCharacterName(fullCharName);
+                            setCharacters([]); // Clear the dropdown
+                          }}
+                        >
+                          <div className="flex items-center justify-start">
+                            <Image
+                              src={character.image}
+                              className="rounded-full w-10 h-10 object-cover"
+                              alt={character.name}
+                              width={25}
+                              height={25}
+                            />
+                            <p className="ml-3">
+                              {character.name} ({character.personName})
+                            </p>
+                          </div>
+                        </li>
+                      ))
+                    )}
                   </ul>
-                )}
+                ) : null}
               </div>
 
               {/* Quote Textarea */}

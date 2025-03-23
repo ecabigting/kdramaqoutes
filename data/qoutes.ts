@@ -20,3 +20,13 @@ export async function createQoute(qouteData: {
     }
   })
 }
+
+
+
+export async function getEnabledQoutes() {
+  return await db.qoutes.findMany({
+    where: { isEnabled: true },
+    orderBy: { createdAt: "desc" },
+  });
+}
+

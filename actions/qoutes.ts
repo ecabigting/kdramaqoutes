@@ -1,7 +1,7 @@
 "use server"
 
 import { auth } from "@/auth"
-import { createQoute } from "../data/qoutes"
+import { createQoute, getEnabledQoutes } from "../data/qoutes"
 import { revalidatePath } from "next/cache"
 
 export async function submitQoute({ qoute, showTitle, characterName, showImage }: { qoute: string, showTitle: string, characterName: string, showImage: string }) {
@@ -32,4 +32,8 @@ export async function submitQoute({ qoute, showTitle, characterName, showImage }
   } catch (error) {
     throw new Error(`Failed to submit qoute:${error}`)
   }
+}
+
+export async function fetchEnabledQoutes() {
+  return await getEnabledQoutes();
 }
