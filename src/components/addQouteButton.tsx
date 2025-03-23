@@ -1,8 +1,10 @@
 "use client"
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { submitQoute } from "../../actions/qoutes";
+import { fetchCharacters, fetchShows } from "../../data/tvdb";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function AddQuoteButton() {
   const { data: session } = useSession();
@@ -16,7 +18,92 @@ export default function AddQuoteButton() {
   const [qoute, setQoute] = useState("")
   const [showImage, setShowImage] = useState("")
 
+  // Search input States
+  const [tvShows, setTvShows] = useState<any[]>([]);
+  const [characters, setCharacters] = useState<any[]>([]);
+  const [selectedTvShow, setSelectedTvShow] = useState<any>(null);
+
+  // Debounced search queries
+  const debouncedShowTitle = useDebounce(showTitle, 1500); // 1.5 seconds
+  const debouncedCharacterName = useDebounce(characterName, 1500); // 1.5 seconds
+
+  // Memoized handleCharacterSearch
+  const handleCharacterSearch = useCallback(
+    async (query: string) => {
+      try {
+        const characters = await fetchCharacters(selectedTvShow.id.split("-")[1], query);
+        setCharacters(characters);
+      } catch (error) {
+        console.log(error);
+        setError("Failed to fetch characters.");
+      }
+    },
+    [selectedTvShow]
+  );
+
+  // Fetch TV shows when debouncedShowTitle changes
+  useEffect(() => {
+    let isActive = true; // Flag to prevent state updates on unmounted component
+
+    const searchTvShows = async () => {
+      if (debouncedShowTitle.length >= 3) {
+        try {
+          const shows = await fetchShows(debouncedShowTitle);
+          if (isActive) setTvShows(shows);
+        } catch (error) {
+          console.log(error)
+          if (isActive) setError("Failed to fetch TV shows.");
+        }
+      } else {
+        if (isActive) setTvShows([]);
+      }
+    };
+
+    searchTvShows();
+
+    return () => {
+      isActive = false; // Cleanup to avoid state updates after component unmounts
+    };
+  }, [debouncedShowTitle]);
+
+  // Fetch characters when debouncedCharacterName changes
+  useEffect(() => {
+    let isActive = true;
+
+    const searchCharacters = async () => {
+      if (selectedTvShow && debouncedCharacterName.length >= 3) {
+        try {
+          const characters = await fetchCharacters(selectedTvShow.id.split("-")[1], debouncedCharacterName);
+          if (isActive) setCharacters(characters);
+        } catch (error) {
+          console.log(error)
+          if (isActive) setError("Failed to fetch characters.");
+        }
+      } else {
+        if (isActive) setCharacters([]);
+      }
+    };
+
+    searchCharacters();
+
+    return () => {
+      isActive = false;
+    };
+  }, [debouncedCharacterName, selectedTvShow, handleCharacterSearch]);
+
   if (!session) return null; // Only show if logged in
+
+  const handleTvShowSearch = async (query: string) => {
+    if (query.length < 3) return; // Only search if the query is at least 3 characters long
+
+    try {
+      const shows = await fetchShows(query);
+      setTvShows(shows);
+    } catch (error) {
+      console.log(error)
+      setError("Failed to fetch TV shows.");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,14 +120,17 @@ export default function AddQuoteButton() {
 
     startTransition(async () => {
       try {
-        await submitQoute(qoute, showTitle, characterName, showImage)
+        await submitQoute({ qoute, showTitle, characterName, showImage })
+
         // Clear the form after successful submission
         setShowTitle("");
         setCharacterName("");
         setQoute("");
+        setTvShows([]);
+        setCharacters([]);
+        setSelectedTvShow(null);
         setFormVisible(false);
         setError(null);
-
 
       } catch (error) {
         setError(error instanceof Error ? error.message : "An unknown error occurred.");
@@ -88,28 +178,69 @@ export default function AddQuoteButton() {
             <form
               onSubmit={handleSubmit}
             >
-              {/* TV Show Title Input */}
-              <input
-                name="tvShowTitle"
-                type="text"
-                placeholder="TV Show Title"
-                className="w-full p-2 border rounded mb-4 text-background"
-                required
-                disabled={isPending}
-                onChange={(e) => setShowTitle(e.target.value)}
-              />
+              {/* TV Show Search */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Search TV Show"
+                  className="w-full p-2 border rounded text-background"
+                  value={showTitle}
+                  onChange={(e) => {
+                    setShowTitle(e.target.value);
+                    handleTvShowSearch(e.target.value);
+                  }}
+                  disabled={isPending}
+                />
+                {tvShows.length > 0 && (
+                  <ul className="mt-2 border rounded">
+                    {tvShows.map((show) => (
+                      <li
+                        key={show.id}
+                        className="p-2 hover:bg-gray-100 cursor-pointer text-background"
+                        onClick={() => {
+                          setSelectedTvShow(show);
+                          setShowTitle(show.translations.eng);
+                          setShowImage(show.image_url)
+                          setTvShows([]); // Clear the dropdown
+                        }}
+                      >
+                        {show.translations.eng}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
-              {/* Character Name Input */}
-              <input
-                name="characterName"
-                type="text"
-                placeholder="Character Name"
-                className="w-full p-2 border rounded mb-4 text-background"
-                required
-                disabled={isPending}
-                onChange={(e) => setCharacterName(e.target.value)}
-
-              />
+              {/* Character Search */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Search Character"
+                  className="w-full p-2 border rounded text-background"
+                  value={characterName}
+                  onChange={(e) => {
+                    setCharacterName(e.target.value);
+                    handleCharacterSearch(e.target.value);
+                  }}
+                  disabled={!selectedTvShow || isPending}
+                />
+                {characters.length > 0 && (
+                  <ul className="mt-2 border rounded">
+                    {characters.map((character) => (
+                      <li
+                        key={character.id}
+                        className="p-2 hover:bg-gray-100 cursor-pointer text-background"
+                        onClick={() => {
+                          setCharacterName(character.name);
+                          setCharacters([]); // Clear the dropdown
+                        }}
+                      >
+                        {character.name} ({character.personName})
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
               {/* Quote Textarea */}
               <textarea

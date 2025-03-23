@@ -4,7 +4,7 @@ import { auth } from "@/auth"
 import { createQoute } from "../data/qoutes"
 import { revalidatePath } from "next/cache"
 
-export async function submitQoute(qoute: string, showTitle: string, characterName: string, showImage: string) {
+export async function submitQoute({ qoute, showTitle, characterName, showImage }: { qoute: string, showTitle: string, characterName: string, showImage: string }) {
   const session = await auth()
 
   if (!session || !session.user?.id) {
