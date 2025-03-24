@@ -6,6 +6,7 @@ import { submitQoute } from "../../actions/qoutes";
 import { fetchCharacters, fetchShows } from "../../data/tvdb";
 import { useDebounce } from "@/hooks/useDebounce";
 import Image from "next/image";
+import { FileImage, ImageIcon, Plus } from "lucide-react";
 
 export default function AddQuoteButton() {
   const { data: session } = useSession();
@@ -27,8 +28,8 @@ export default function AddQuoteButton() {
   const [selectedTvShow, setSelectedTvShow] = useState<any>(null);
 
   // Debounced search queries
-  const debouncedShowTitle = useDebounce(showTitle, 1500); // 1.5 seconds
-  const debouncedCharacterName = useDebounce(characterName, 1500); // 1.5 seconds
+  const debouncedShowTitle = useDebounce(showTitle, 1000); // 1.5 seconds
+  const debouncedCharacterName = useDebounce(characterName, 1000); // 1.5 seconds
 
   // Memoized handleCharacterSearch
   const handleCharacterSearch = useCallback(
@@ -120,6 +121,20 @@ export default function AddQuoteButton() {
 
   if (!session) return null; // Only show if logged in
 
+  const handleFormClose = () => {
+    setShowTitle("");
+    setCharacterName("");
+    setQoute("");
+    setTvShowsLoading(false);
+    setCharactersLoading(false)
+    setTvShows([]);
+    setCharacters([]);
+    setShowImage("")
+    setSelectedTvShow(null);
+    setFormVisible(!isFormVisible);
+    setError(null);
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -143,6 +158,7 @@ export default function AddQuoteButton() {
         setQoute("");
         setTvShows([]);
         setCharacters([]);
+        setShowImage("")
         setSelectedTvShow(null);
         setFormVisible(false);
         setError(null);
@@ -157,16 +173,18 @@ export default function AddQuoteButton() {
     <>
       {/* Floating Plus Button */}
       <button
-        onClick={() => setFormVisible(!isFormVisible)}
-        className="fixed top-1/2 right-8 transform -translate-y-1/2 bg-purple-800 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-purple-700"
+        onClick={() => handleFormClose()}
+        className="fixed top-1/2 right-8 transform 
+        -translate-y-1/2 bg-purple-800 text-white 
+        rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-purple-700"
       >
-        +
+        <Plus />
       </button>
 
       {/* Form Modal */}
       {isFormVisible && (
         <div className="fixed inset-0 bg-transparent flex items-center justify-center">
-          <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-96 relative">
+          <div className="bg-gray-800 p-3 rounded-lg shadow-lg w-96 relative">
             {/* Close Button */}
             <button
               onClick={() => setFormVisible(false)}
@@ -187,143 +205,160 @@ export default function AddQuoteButton() {
                 />
               </svg>
             </button>
+            {/* New Layout for Poster Preview and Form */}
+            <div className="flex">
+              {/* Poster Preview */}
+              <div className="w-1/3 mr-2">
+                {showImage ? (
+                  <Image
+                    src={showImage}
+                    alt={showTitle}
+                    width={118}
+                    height={313}
+                    className="rounded-lg object-cover h-full w-full"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center border-2 border-dashed border-gray-400 h-80 rounded-lg">
+                    <FileImage className="h-30 w-30" />
+                  </div>
+                )}
+              </div>
+              {/* Form Content */}
+              <div className="w-2/3">
+                <h2 className="text-xl font-bold mb-4 text-purple-400">Add A Quote</h2>
+                <form
+                  onSubmit={handleSubmit}
+                >
+                  {/* TV Show Search */}
+                  <div className="mb-4">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Search TV Show"
+                        className="w-full p-2 border rounded bg-gray-700 text-white placeholder-gray-400"
+                        value={showTitle}
+                        onChange={(e) => {
+                          setShowTitle(e.target.value);
+                          // If user types after selecting a show, reset selection
+                          if (selectedTvShow) setSelectedTvShow(null);
+                        }}
+                        disabled={isPending}
+                      />
+                    </div>
+                    {tvShows.length > 0 || tvShowsLoading ? (
+                      <ul
+                        className="absolute mt-1 z-10 bg-gray-700 border border-gray-600 rounded shadow-lg p-1 w-[90%] text-white"
+                      >
+                        {tvShowsLoading ? (
+                          <li
+                            className="p-2 text-center text-gray-300"
+                          >Fetching shows...</li>
+                        ) : (
+                          tvShows.map((show) => (
+                            <li
+                              key={show.id}
+                              className="p-2 hover:bg-gray-600 cursor-pointer text-white transition-colors"
+                              onClick={() => {
+                                setSelectedTvShow(show);
+                                const showTitleWithYear = `${show.translations.eng} (${show.year}) `;
+                                setShowTitle(showTitleWithYear);
+                                setShowImage(show.image_url);
+                                setTvShows([]); // Clear the dropdown
+                              }}
+                            >
+                              <div className="flex items-center justify-start">
+                                <Image
+                                  src={show.image_url}
+                                  className="rounded-sm"
+                                  alt={show.translations.eng}
+                                  width={50}
+                                  height={100}
+                                />
+                                <p className="ml-2">
+                                  {show.translations.eng} ({show.year})
+                                </p>
+                              </div>
+                            </li>
+                          ))
+                        )}
+                      </ul>
+                    ) : null}
+                  </div>
+                  {/* Character Search */}
+                  <div className="mb-4">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Search Character"
+                        className="w-full p-2 border rounded bg-gray-700 text-white placeholder-gray-400"
+                        value={characterName}
+                        onChange={(e) => {
+                          setCharacterName(e.target.value);
+                        }}
+                        disabled={!selectedTvShow || isPending}
+                      />
+                    </div>
+                    {characters.length > 0 || charactersLoading ? (
+                      <ul
+                        className="absolute mt-1 z-10 bg-gray-700 border border-gray-600 rounded shadow-lg p-1 w-[90%] text-white"
+                      >
+                        {charactersLoading ? (
+                          <li
+                            className="p-2 text-center text-gray-300"
+                          >Loading...</li>
+                        ) : (
+                          characters.map((character) => (
+                            <li
+                              key={character.id}
+                              className="p-2 hover:bg-gray-600 cursor-pointer text-white transition-colors"
+                              onClick={() => {
+                                const fullCharName = `${character.name} (${character.personName})`;
+                                setCharacterName(fullCharName);
+                                setCharacters([]); // Clear the dropdown
+                              }}
+                            >
+                              <div className="flex items-center justify-start">
+                                <Image
+                                  src={character.image}
+                                  className="rounded-full w-10 h-10 object-cover border border-purple-400"
+                                  alt={character.name}
+                                  width={25}
+                                  height={25}
+                                />
+                                <p className="ml-3">
+                                  {character.name} ({character.personName})
+                                </p>
+                              </div>
+                            </li>
+                          ))
+                        )}
+                      </ul>
+                    ) : null}
+                  </div>
 
-            {/* Form Content */}
-            <h2 className="text-xl font-bold mb-4 text-purple-400">Add A Quote</h2>
-            <form
-              onSubmit={handleSubmit}
-            >
-              {/* TV Show Search */}
-              <div className="mb-4">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search TV Show"
-                    className="w-full p-2 border rounded bg-gray-700 text-white placeholder-gray-400"
-                    value={showTitle}
-                    onChange={(e) => {
-                      setShowTitle(e.target.value);
-                      // If user types after selecting a show, reset selection
-                      if (selectedTvShow) setSelectedTvShow(null);
-                    }}
+                  {/* Quote Textarea */}
+                  <textarea
+                    name="qoute"
                     disabled={isPending}
-                  />
-                </div>
-                {tvShows.length > 0 || tvShowsLoading ? (
-                  <ul
-                    className="absolute mt-1 z-10 bg-gray-700 border border-gray-600 rounded shadow-lg p-1 w-[90%] text-white"
-                  >
-                    {tvShowsLoading ? (
-                      <li
-                        className="p-2 text-center text-gray-300"
-                      >Fetching shows...</li>
-                    ) : (
-                      tvShows.map((show) => (
-                        <li
-                          key={show.id}
-                          className="p-2 hover:bg-gray-600 cursor-pointer text-white transition-colors"
-                          onClick={() => {
-                            setSelectedTvShow(show);
-                            const showTitleWithYear = `${show.translations.eng} (${show.year}) `;
-                            setShowTitle(showTitleWithYear);
-                            setShowImage(show.image_url);
-                            setTvShows([]); // Clear the dropdown
-                          }}
-                        >
-                          <div className="flex items-center justify-start">
-                            <Image
-                              src={show.image_url}
-                              className="rounded-sm"
-                              alt={show.translations.eng}
-                              width={50}
-                              height={100}
-                            />
-                            <p className="ml-2">
-                              {show.translations.eng} ({show.year})
-                            </p>
-                          </div>
-                        </li>
-                      ))
-                    )}
-                  </ul>
-                ) : null}
-
-              </div>
-
-              {/* Character Search */}
-              <div className="mb-4">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search Character"
+                    placeholder="Enter your TV quote (max 200 characters)..."
                     className="w-full p-2 border rounded bg-gray-700 text-white placeholder-gray-400"
-                    value={characterName}
-                    onChange={(e) => {
-                      setCharacterName(e.target.value);
-                    }}
-                    disabled={!selectedTvShow || isPending}
+                    rows={4}
+                    maxLength={200} // Limit to 200 characters
+                    required
+                    onChange={(e) => setQoute(e.target.value)}
                   />
-                </div>
-                {characters.length > 0 || charactersLoading ? (
-                  <ul
-                    className="absolute mt-1 z-10 bg-gray-700 border border-gray-600 rounded shadow-lg p-1 w-[90%] text-white"
+                  {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                  <button
+                    type="submit"
+                    className="bg-purple-800 text-white px-4 py-2 rounded hover:bg-purple-700"
+                    disabled={isPending}
                   >
-                    {charactersLoading ? (
-                      <li
-                        className="p-2 text-center text-gray-300"
-                      >Loading...</li>
-                    ) : (
-                      characters.map((character) => (
-                        <li
-                          key={character.id}
-                          className="p-2 hover:bg-gray-600 cursor-pointer text-white transition-colors"
-                          onClick={() => {
-                            const fullCharName = `${character.name} (${character.personName})`;
-                            setCharacterName(fullCharName);
-                            setCharacters([]); // Clear the dropdown
-                          }}
-                        >
-                          <div className="flex items-center justify-start">
-                            <Image
-                              src={character.image}
-                              className="rounded-full w-10 h-10 object-cover border border-purple-400"
-                              alt={character.name}
-                              width={25}
-                              height={25}
-                            />
-                            <p className="ml-3">
-                              {character.name} ({character.personName})
-                            </p>
-                          </div>
-                        </li>
-                      ))
-                    )}
-                  </ul>
-                ) : null}
+                    {isPending ? "Adding.." : "Add"}
+                  </button>
+                </form>
               </div>
-
-              {/* Quote Textarea */}
-              <textarea
-                name="qoute"
-                disabled={isPending}
-                placeholder="Enter your TV quote (max 200 characters)..."
-                className="w-full p-2 border rounded bg-gray-700 text-white placeholder-gray-400"
-                rows={4}
-                maxLength={200} // Limit to 200 characters
-                required
-                onChange={(e) => setQoute(e.target.value)}
-              />
-              {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-              <button
-                type="submit"
-                className="bg-purple-800 text-white px-4 py-2 rounded hover:bg-purple-700"
-                disabled={isPending}
-              >
-                {isPending ? "Adding.." : "Add"}
-              </button>
-            </form>
+            </div>
           </div>
-
         </div >
       )
       }

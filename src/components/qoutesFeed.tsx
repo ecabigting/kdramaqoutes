@@ -102,7 +102,7 @@ export default async function QuotesFeed() {
 
                 {/* Show Title and Created At */}
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-bold text-purple-400">
+                  <h3 className="text-xl font-bold text-purple-400">
                     {qoute.showTitle}
                   </h3>
                   <span className="text-sm text-gray-400">
@@ -118,7 +118,7 @@ export default async function QuotesFeed() {
                 {/* Author Name and Likes */}
                 <div className="flex justify-between items-center mt-2">
                   {qoute.authorName && (
-                    <span className="text-gray-400 text-sm">
+                    <span className="text-gray-400 text-xs">
                       by {qoute.authorName}
                     </span>
                   )}

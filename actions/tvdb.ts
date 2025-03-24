@@ -57,7 +57,9 @@ export async function searchCharacter(seriesId: string, query: string) {
   const data = await response.json();
 
   const characters = data.data.characters || [];
+  console.log(characters)
   return characters.filter((character: any) =>
-    character.name.toLowerCase().includes(query.toLocaleLowerCase())
+    character.name.toLowerCase().includes(query.toLowerCase()) ||
+    character.personName.toLowerCase().includes(query.toLowerCase())
   );
 }
