@@ -11,6 +11,7 @@ model User {
   enabledAt     DateTime        @default(now())
   disabledBy    String? // Who disabled the user
   disabledAt    DateTime? // When the user was disabled
+  displayName   String?
   accounts      Account[]
   Authenticator Authenticator[]
   sessions      Session[]

@@ -22,6 +22,7 @@ export async function submitQoute({ qoute, showTitle, characterName, showImage }
   try {
     await createQoute({
       qoutes: qoute,
+      displayName: session.user.displayName,
       userId: session.user.id,
       authorName: session.user.name,
       image: showImage,

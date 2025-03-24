@@ -3,6 +3,7 @@ import NextAuth from "next-auth"
 import { db } from "./prisma"
 import authConfig from "./auth.config"
 import { User } from "@prisma/client";
+import { generateDisplayName } from "../lib/utils";
 
 /*
  *
@@ -10,10 +11,11 @@ import { User } from "@prisma/client";
  * 
  */
 
+
 type CustomUser = User & {
   enabledBy?: string;
+  displayName?: string;
 }
-
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -24,18 +26,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (customUser && account?.provider) {
         customUser.enabledBy = `enabledBy-${account.provider}-signIn`;
       }
+
+      // Generate and assign display name
+      if (user.email) {
+        customUser.displayName = generateDisplayName(user.email);
+      }
+
       return true;
     },
     jwt: async ({ token, user }) => {
       // Include the user ID in the token
       if (user) {
         token.id = user.id;
+        token.displayName = (user as CustomUser).displayName;
       }
       return token;
     },
     session: async ({ session, token }) => {
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.displayName = token.displayName as string;
       }
       return session;
     },

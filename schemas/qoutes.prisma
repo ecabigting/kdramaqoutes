@@ -13,6 +13,6 @@ model Qoutes {
   enabledAt     DateTime  @default(now())
   disabledBy    String? // Who disabled the user
   disabledAt    DateTime? // When the user was disabled
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 }

@@ -7,16 +7,30 @@
  *
  */
 export const publicRoutes: string[] = [
-  "/",          // Home
-  "/signup",    // Sign Up
-  "/signin",    // Sign In
-  "/about",     // About Us
-  "/blog",      // Blog
-  "/contact",   // Contact Us
-  "/terms",     // Terms of Service
-  "/privacy",   // Privacy Policy
-  "/dmca",      // DMCA
-  "/docs",      // Documentation
-  "/guide",     // User Guide
-  "/api"        // API Reference
+  "/",
+  "/signup",
+  "/signin",
+  "/about",
+  "/blog",
+  "/contact",
+  "/terms",
+  "/privacy",
+  "/dmca",
+  "/docs",
+  "/guide",
+  "/api"
 ];
+
+/**
+ *
+ * Protected Routes - can only be access when user logged in
+ * @type {string[]}
+ * */
+
+export const protectedRoutes: string[] = [
+  "/settings",
+  "/profile",
+  "/dashboard"
+];
+
+export const DEFAULT_USER_ROUTE = "/settings"
