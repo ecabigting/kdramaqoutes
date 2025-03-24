@@ -4,6 +4,7 @@ import "./globals.css";
 import LayoutHeader from "@/components/layoutHeader";
 import { SessionProvider } from "next-auth/react";
 import AddQuoteButton from "@/components/addQouteButton";
+import LayoutFooter from "@/components/layoutFooter";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
           <LayoutHeader />
           {children}
           <AddQuoteButton />
+          <LayoutFooter />
         </body>
       </html>
     </SessionProvider>
