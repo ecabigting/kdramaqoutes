@@ -1,21 +1,22 @@
 model User {
-  id            String          @id @default(cuid())
-  name          String?
-  email         String          @unique
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  isEnabled     Boolean         @default(true) // Enabled by default
-  enabledBy     String? // Who enabled the user
-  enabledAt     DateTime        @default(now())
-  disabledBy    String? // Who disabled the user
-  disabledAt    DateTime? // When the user was disabled
-  displayName   String?
-  accounts      Account[]
-  Authenticator Authenticator[]
-  sessions      Session[]
-  qoutes        Qoutes[]
+  id                 String          @id @default(cuid())
+  name               String?
+  email              String          @unique
+  emailVerified      DateTime?
+  image              String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  isEnabled          Boolean         @default(true) // Enabled by default
+  enabledBy          String? // Who enabled the user
+  enabledAt          DateTime        @default(now())
+  disabledBy         String? // Who disabled the user
+  disabledAt         DateTime? // When the user was disabled
+  displayName        String?
+  displayNameChanged Boolean         @default(false) // New field
+  accounts           Account[]
+  Authenticator      Authenticator[]
+  sessions           Session[]
+  qoutes             Qoutes[]
 }
 
 model Account {

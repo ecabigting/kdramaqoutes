@@ -30,6 +30,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Generate and assign display name
       if (user.email) {
         customUser.displayName = generateDisplayName(user.email);
+        customUser.displayNameChanged = false; // Set to false on first sign-in
       }
 
       return true;
@@ -39,6 +40,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id;
         token.displayName = (user as CustomUser).displayName;
+        token.displayNameChanged = (user as CustomUser).displayNameChanged; // New field
       }
       return token;
     },
@@ -46,6 +48,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string;
         session.user.displayName = token.displayName as string;
+        session.user.displayNameChanged = token.displayNameChanged as boolean; // New field
       }
       return session;
     },

@@ -2,7 +2,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { getUserById, updateUserDisplayName } from "../data/user";
+import { getDisplayName, getUserById, setDisplayNameDismissed, updateUserDisplayName } from "../data/user";
 
 export const getCurrentUser = async () => {
   const session = await auth();
@@ -15,9 +15,38 @@ export const getCurrentUser = async () => {
   };
 };
 
-export const updateCurrentUserDisplayName = async (displayName: string) => {
+export const updateCurrentUserDisplayName = async (formData: FormData) => {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("Unauthorized");
+
+    const displayName = formData.get("displayName") as string;
+
+    // Check availability
+    const isAvailable = await checkDisplayNameAvailable(displayName, session.user.id);
+    if (!isAvailable) throw new Error(`"${displayName}" is already taken`);
+
+    // Update in database
+    await updateUserDisplayName(session.user.id, displayName);
+
+    return { success: true };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Failed to update display name"
+    };
+  }
+};
+
+export const dismissDisplayNamePrompt = async () => {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
-  return await updateUserDisplayName(session.user.id, displayName);
+  session.user.displayNameChanged = true;
+  return await setDisplayNameDismissed(session.user.id);
 };
+
+export const checkDisplayNameAvailable = async (displayName: string, currentUserId: string) => {
+  return await getDisplayName(displayName, currentUserId);
+}
+
+

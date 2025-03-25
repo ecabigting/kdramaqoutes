@@ -2,9 +2,13 @@ import { format } from "date-fns";
 import { Heart } from "lucide-react"; // Use a heart icon from Lucide or any other icon library
 import Image from "next/image";
 import { fetchEnabledQoutes } from "../../actions/qoutes";
+import { dismissDisplayNamePrompt, getCurrentUser } from "../../actions/user";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function QuotesFeed() {
   const qoutes = await fetchEnabledQoutes();
+  const user = await getCurrentUser();
 
   // Array of background colors for the cards
   const cardBackgrounds = [
@@ -13,8 +17,35 @@ export default async function QuotesFeed() {
     "bg-gray-900",
   ];
 
+  const handleDismiss = async () => {
+    'use server';
+    await dismissDisplayNamePrompt();
+    redirect("/");
+  };
+
   return (
     <div className="flex flex-col space-y-4 p-4">
+      {/* Welcome Message */}
+      {user && !user.displayNameChanged && (
+        <div className="bg-purple-700 text-white p-4 rounded-lg flex flex-col space-y-2">
+          <p className="text-white">
+            Welcome! We&apos;ve set your display name to <span className="font-bold">{user.displayName}</span>.
+          </p>
+          <div className="flex space-x-2 justify-end font-bold">
+            <Link href="/settings" className=" hover:underline">
+              Change it?
+            </Link>
+            <form action={handleDismiss}>
+              <button
+                type="submit"
+                className=" hover:underline"
+              >
+                Dismiss
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
       {qoutes.map((qoute, index) => {
         // Cycle through the background colors
         const bgColor = cardBackgrounds[index % cardBackgrounds.length];

@@ -8,7 +8,8 @@ export const getUserById = async (id: string) => {
       name: true,
       email: true,
       image: true,
-      displayName: true
+      displayName: true,
+      displayNameChanged: true // New field
     },
   });
 };
@@ -16,6 +17,26 @@ export const getUserById = async (id: string) => {
 export const updateUserDisplayName = async (userId: string, displayName: string) => {
   return await db.user.update({
     where: { id: userId },
-    data: { displayName },
+    data: { displayName, displayNameChanged: true },
   });
+};
+
+export const setDisplayNameDismissed = async (userId: string) => {
+  return await db.user.update({
+    where: { id: userId },
+    data: { displayNameChanged: true },
+  });
+};
+
+export const getDisplayName = async (displayName: string, currentUserId?: string) => {
+  const existingUser = await db.user.findFirst({
+    where: {
+      displayName: {
+        equals: displayName, // Exact match (case-sensitive)
+      },
+      ...(currentUserId ? { NOT: { id: currentUserId } } : {}), // Optional current user exclusion
+    },
+    select: { id: true }
+  });
+  return !existingUser;
 };
