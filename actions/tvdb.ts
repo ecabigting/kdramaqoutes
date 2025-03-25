@@ -49,7 +49,6 @@ export async function searchCharacter(seriesId: string, query: string) {
     },
   });
 
-  console.log(`character data of ${seriesId}:`, response)
   if (!response.ok) {
     throw new Error("Failed to fetch characters.")
   }
@@ -57,7 +56,6 @@ export async function searchCharacter(seriesId: string, query: string) {
   const data = await response.json();
 
   const characters = data.data.characters || [];
-  console.log(characters)
   return characters.filter((character: any) =>
     character.name.toLowerCase().includes(query.toLowerCase()) ||
     character.personName.toLowerCase().includes(query.toLowerCase())

@@ -3,7 +3,6 @@ import { db } from "@/prisma";
 
 export async function createQoute(qouteData: {
   qoutes: string,
-  displayName?: string,
   userId: string,
   authorName?: string,
   image: string,
@@ -17,7 +16,7 @@ export async function createQoute(qouteData: {
       enabledBy: qouteData.userId,
       isEnabled: true,
       userId: qouteData.userId,
-      image: qouteData.image
+      image: qouteData.image,
     }
   })
 }
