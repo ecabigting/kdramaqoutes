@@ -42,7 +42,7 @@ export default function LayoutFooter() {
           <div className="space-y-2">
             <h3 className="text-purple-400 font-bold mb-4">Social</h3>
             <div className="flex space-x-4">
-              <Link href="https://github.com" className="hover:text-purple-500 transition-colors">
+              <Link href="https://github.com/ecabigting/kdramaqoutes" className="hover:text-purple-500 transition-colors">
                 <GithubIcon className="w-6 h-6" />
               </Link>
               <Link href="https://twitter.com" className="hover:text-purple-500 transition-colors">
@@ -53,13 +53,16 @@ export default function LayoutFooter() {
               </Link>
             </div>
             <div className="mt-4">
-              <Image
-                src="/thetvdb-logo.png"
-                alt="TVDB Logo"
-                width={100}
-                height={40}
-                className="hover:opacity-75 transition-opacity"
-              />
+              <Link href="https://thetvdb.com/">
+                <Image
+                  src="/thetvdb-logo.png"
+                  alt="TVDB Logo"
+                  width={100}
+                  height={40}
+                  className="hover:opacity-75 transition-opacity"
+                />
+              </Link>
+
             </div>
           </div>
         </div>

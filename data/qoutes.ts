@@ -25,6 +25,15 @@ export async function getEnabledQoutes() {
   return await db.qoutes.findMany({
     where: { isEnabled: true },
     orderBy: { createdAt: "desc" },
+    include: {
+      user: {
+        select: {
+          displayName: true,
+          image: true
+        }
+      }
+    }
   });
 }
+
 
