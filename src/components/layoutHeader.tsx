@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -69,10 +69,11 @@ export default function LayoutHeader() {
             )}
           </>
         ) : (
-          // Sign In Link
-          <button onClick={() => signIn()} className="m-1.5">
-            Join
-          </button>
+          <>
+            <div>
+              <Link href="/signup">JOIN</Link>
+            </div>
+          </>
         )}
       </div>
     </header>

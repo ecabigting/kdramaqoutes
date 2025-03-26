@@ -15,9 +15,11 @@ import { generateDisplayName } from "../lib/utils";
 type CustomUser = User & {
   enabledBy?: string;
   displayName?: string;
+  displayNameChanged?: boolean;
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  debug: true,
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   callbacks: {
