@@ -38,21 +38,8 @@ export function SignupForm() {
             return;
           }
 
-          // Auto-login after successful registration
-          // const signInResult = await signIn('credentials', {
-          //   email: data.email,
-          //   password: data.password,
-          //   redirect: false,
-          // });
-          //
-          // if (signInResult?.error) {
-          //   setError(signInResult.error);
-          //   return;
-          // }
-
           setSuccess(true);
           reset();
-          // router.push('/settings'); // Redirect to dashboard after successful signup
         } catch (err) {
           console.log(err)
           setError('An unexpected error occurred. Please try again.');
@@ -67,17 +54,6 @@ export function SignupForm() {
 
   return (
     <div className="space-y-4">
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md text-sm">
-          Account created successfully! Please check your email for verification.
-        </div>
-      )}
 
       <button
         onClick={handleGoogleSignIn}
@@ -92,6 +68,18 @@ export function SignupForm() {
         <span className="mx-4 text-gray-500">or</span>
         <div className="flex-grow border-t border-gray-300"></div>
       </div>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md text-sm">
+          Account created successfully! Please check your email for verification.
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Display Name Field */}

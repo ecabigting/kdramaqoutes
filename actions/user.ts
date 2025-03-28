@@ -136,9 +136,17 @@ export const verifyUserEmail = async (token: string): Promise<{ success: boolean
     if (!verification) {
       return { success: false, error: "Invalid Verification Link!" }
     }
-
+    // TODO : REMOVE THE Date wrapping verification.expires, its only for your local testing
     if (new Date() > new Date(verification.expires)) {
-      return { success: false, error: "Verification Link expired!" }
+      const user = await findUserByEmail(verification.identifier)
+      const token = await createVerificationToken(verification.identifier);
+      if (!user) return { success: false, error: "Failed verifying your email! Please contact support!" }
+      // Send verification token
+      const emailResult = await sendUserVerificationEmail(user.email, user.displayName ?? '', token)
+      if (!emailResult) {
+        return { success: false, error: "Failed sending email verification. Please contact support!" }
+      }
+      return { success: false, error: "EXPIRED_TOKEN" }
     }
 
     await verifyUserByToken(verification.identifier);
