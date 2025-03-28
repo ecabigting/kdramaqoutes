@@ -49,7 +49,7 @@ export default async function QuotesFeed() {
       {qoutes.map((qoute, index) => {
         // Cycle through the background colors
         const bgColor = cardBackgrounds[index % cardBackgrounds.length];
-        const authorName = qoute.user?.displayName;
+        const authorName = qoute.user?.displayName?.trim() || "kdramanoobie";
 
         return (
           <div
@@ -151,7 +151,7 @@ export default async function QuotesFeed() {
                 <div className="flex justify-between items-center mt-2">
                   {authorName && (
                     <span className="text-gray-400 text-xs">
-                      by {authorName}
+                      by {qoute.authorName}
                     </span>
                   )}
                   <button className="flex items-center space-x-1 text-purple-400 hover:text-purple-300 transition-colors">

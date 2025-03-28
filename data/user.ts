@@ -1,4 +1,4 @@
-// data/user.ts
+// ./src/data/user.ts
 
 import { db } from "@/prisma";
 

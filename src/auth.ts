@@ -1,3 +1,4 @@
+// ./src/auth.ts
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import NextAuth from "next-auth"
 import { db } from "./prisma"
