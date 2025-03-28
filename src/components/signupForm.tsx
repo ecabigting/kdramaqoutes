@@ -14,7 +14,6 @@ export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  // const router = useRouter();
 
   const {
     register,

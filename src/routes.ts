@@ -18,7 +18,8 @@ export const publicRoutes: string[] = [
   "/dmca",
   "/docs",
   "/guide",
-  "/api"
+  "/api",
+  "/verify-email"
 ];
 
 /**

@@ -1,6 +1,8 @@
 // ./src/data/user.ts
 
 import { db } from "@/prisma";
+import { generateVerificationToken } from "../lib/utils";
+import { addHours } from "date-fns";
 
 export const getUserById = async (id: string) => {
   return await db.user.findUnique({
@@ -102,3 +104,39 @@ export const findUserByEmail = async (email: string) => {
     }
   });
 };
+
+export const createVerificationToken = async (identifier: string) => {
+  // delete all existing token
+  await db.verificationToken.deleteMany({
+    where: { identifier: identifier }
+  })
+
+  // create new verificationToken
+  const newToken = generateVerificationToken();
+  const verificationToken = await db.verificationToken.create({
+    data: {
+      identifier,
+      token: newToken,
+      expires: addHours(new Date(), 24)
+    }
+  })
+
+  return verificationToken.token;
+}
+
+export const getVerificationToken = async (token: string) => {
+  return await db.verificationToken.findFirst({
+    where: { token: token }
+  })
+}
+
+export const verifyUserByToken = async (email: string) => {
+  await db.user.update({
+    where: { email: email },
+    data: {
+      emailVerified: new Date()
+    }
+  })
+
+  await db.verificationToken.deleteMany({ where: { identifier: email } });
+}

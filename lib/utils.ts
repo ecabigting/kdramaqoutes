@@ -1,4 +1,9 @@
 // lib/utils.ts
+import { v4 as uuidv4 } from 'uuid';
+
+export function generateVerificationToken(): string {
+  return uuidv4();
+}
 export function generateDisplayName(email: string): string {
   const dpPrefix = ["unni", "oppa", "noona", "hyeong"];
   const dpSuffix = ["Kimchi", "Bap", "Doenjang", "Gochujang", "Bulgogi"];
@@ -11,3 +16,5 @@ export function generateDisplayName(email: string): string {
 
   return `${randomPrefix}${truncatedEmail}${randomNum}${randomSuffix}`;
 }
+
+

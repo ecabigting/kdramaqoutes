@@ -2,8 +2,9 @@
 "use server";
 import bcrypt from 'bcrypt';
 import { auth } from "@/auth";
-import { checkDisplayNameExists, checkEmailExists, createNewUser, findUserByEmail, getDisplayName, getUserById, setDisplayNameDismissed, updateUserDisplayName } from "../data/user";
+import { checkDisplayNameExists, checkEmailExists, createNewUser, createVerificationToken, findUserByEmail, getDisplayName, getUserById, getVerificationToken, setDisplayNameDismissed, updateUserDisplayName, verifyUserByToken } from "../data/user";
 import { signupFormSchema } from "@/types/schema/signupFormSchema";
+import { sendUserVerificationEmail } from '../lib/emailer';
 
 export const createUser = async (data: {
   displayName: string;
@@ -32,13 +33,22 @@ export const createUser = async (data: {
 
     // Create user
     const user = await createNewUser(validatedData);
+
+    // Create Token
+    const token = await createVerificationToken(user.email);
+
+    // Send verification token
+    const emailResult = await sendUserVerificationEmail(user.email, user.displayName as string, token)
+    if (!emailResult) {
+      return { error: "Failed sending email verification. Please contact support!" }
+    }
+
     return { success: true, userId: user.id };
   } catch (error) {
     console.error('Registration error:', error);
     return { error: 'Failed to create user' };
   }
 };
-
 
 export const getCurrentUser = async () => {
   const session = await auth();
@@ -87,24 +97,20 @@ export const checkDisplayNameAvailable = async (displayName: string, currentUser
 
 export const verifyCredentials = async (email: string, password: string) => {
   try {
-    // 1. Find user
     const user = await findUserByEmail(email);
     if (!user) {
       return { error: 'Invalid email or password' };
     }
 
-    // 2. Check account status
     if (user.isEnabled === false) {
       return { error: 'Account disabled. Contact support' };
     }
 
-    // 3. Verify password
     const validPassword = await bcrypt.compare(password, user.password!);
     if (!validPassword) {
       return { error: 'Invalid email or password' };
     }
 
-    // 4. Return success with sanitized user data
     return {
       success: true,
       user: {
@@ -122,3 +128,23 @@ export const verifyCredentials = async (email: string, password: string) => {
     return { error: 'Authentication failed. Please try again' };
   }
 };
+
+export const verifyUserEmail = async (token: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+
+    const verification = await getVerificationToken(token)
+    if (!verification) {
+      return { success: false, error: "Invalid Verification Link!" }
+    }
+
+    if (new Date() > new Date(verification.expires)) {
+      return { success: false, error: "Verification Link expired!" }
+    }
+
+    await verifyUserByToken(verification.identifier);
+    return { success: true, error: "" }
+  } catch (err) {
+    console.log(err)
+    return { success: false, error: "Unable to verify your email!" }
+  }
+}
