@@ -1,11 +1,11 @@
-// src/components/SignupForm.tsx
+// ./src/app/components/SignupForm.tsx
 'use client';
 
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signupFormSchema, SignupFormData } from '../types/schema/signupFormSchema';
-import { signIn } from 'next-auth/react';
+
 import { createUser } from '../../actions/user';
 import { Spinner } from './ui/spinner';
 
@@ -48,27 +48,9 @@ export function SignupForm() {
     });
   };
 
-  const handleGoogleSignIn = () => {
-    signIn('google');
-  };
 
   return (
     <div className="space-y-4">
-
-      <button
-        onClick={handleGoogleSignIn}
-        disabled={isPending}
-        className="w-full py-2 px-4 border border-gray-300 rounded-md flex items-center justify-center hover:bg-purple-600 disabled:opacity-50"
-      >
-        Sign in with Google
-      </button>
-
-      <div className="flex items-center my-4">
-        <div className="flex-grow border-t border-gray-300"></div>
-        <span className="mx-4 text-gray-500">or</span>
-        <div className="flex-grow border-t border-gray-300"></div>
-      </div>
-
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md">
           {error}

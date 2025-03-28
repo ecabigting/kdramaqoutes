@@ -1,4 +1,4 @@
-// actions/user.ts
+// ./actions/user.ts
 "use server";
 import bcrypt from 'bcrypt';
 import { auth } from "@/auth";

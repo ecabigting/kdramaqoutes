@@ -1,4 +1,4 @@
-// ./src/data/user.ts
+// ./data/user.ts
 
 import { db } from "@/prisma";
 import { generateVerificationToken } from "../lib/utils";
