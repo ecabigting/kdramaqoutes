@@ -119,7 +119,8 @@ export const verifyCredentials = async (email: string, password: string) => {
         name: user.name,
         displayName: user.displayName,
         displayNameChanged: user.displayNameChanged,
-        image: user.image
+        image: user.image,
+        emailVerified: user.emailVerified
       }
     };
 

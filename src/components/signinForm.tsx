@@ -1,16 +1,16 @@
-// ./src/app/components/SignupForm.tsx
+// ./src/app/components/signinForm.tsx
 'use client';
 
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { signupFormSchema, SignupFormData } from '../types/schema/signupFormSchema';
-
-import { createUser } from '../../actions/user';
 import { Spinner } from './ui/spinner';
-import Link from 'next/link';
+import { SigninFormData, signinFormSchema } from '@/types/schema/signinFormSchema';
+import { verifyCredentials } from '../../actions/user';
+import { createVerificationToken } from '../../data/user';
+import { sendUserVerificationEmail } from '../../lib/emailer';
 
-export function SignupForm() {
+export function SigninForm() {
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,18 +21,28 @@ export function SignupForm() {
     handleSubmit,
     formState: { errors },
     reset
-  } = useForm<SignupFormData>({
-    resolver: zodResolver(signupFormSchema)
+  } = useForm<SigninFormData>({
+    resolver: zodResolver(signinFormSchema)
   });
 
-  const onSubmit = (data: SignupFormData) => {
+  const onSubmit = (data: SigninFormData) => {
     startTransition(async () => {
       setError(null);
       setSuccess(false);
 
       startTransition(async () => {
         try {
-          const result = await createUser(data);
+          const validatedData = signinFormSchema.parse(data);
+          const result = await verifyCredentials(validatedData.email, validatedData.password);
+          if (!result.user) {
+            setError("Invalid Email or Password!")
+            return;
+          }
+
+          if (!result.user?.emailVerified) {
+            const verificationToken = await createVerificationToken(result.user?.email)
+            const emailResult = await sendUserVerificationEmail(result.user?.email, result.user?.displayName, verificationToken)
+          }
 
           if (result?.error) {
             setError(result.error);
@@ -58,28 +68,7 @@ export function SignupForm() {
         </div>
       )}
 
-      {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md text-sm">
-          Account created successfully! Please check your email for verification.
-        </div>
-      )}
-
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Display Name Field */}
-        <div>
-          <input
-            {...register('displayName')}
-            placeholder="Display Name"
-            disabled={isPending}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          />
-          {errors.displayName && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.displayName.message}
-            </p>
-          )}
-        </div>
-
         {/* Email Field */}
         <div>
           <input
@@ -131,16 +120,12 @@ export function SignupForm() {
               <div className="text-purple-600">
                 <Spinner />
               </div>
-              Creating Account...
+              Signing In..
             </>
           ) : (
-            'Sign Up'
+            'Sign In'
           )}
         </button>
-        <Link href="/signin" className="w-full py-2 px-4 bg-purple-800 text-white rounded-md hover:bg-purple-600 disabled:opacity-50 flex justify-center items-center"
-        >
-          Already have an account?&nbsp; <strong>Sign In</strong>
-        </Link>
       </form>
     </div>
   );

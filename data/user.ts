@@ -100,7 +100,8 @@ export const findUserByEmail = async (email: string) => {
       displayName: true,
       displayNameChanged: true,
       image: true,
-      isEnabled: true
+      isEnabled: true,
+      emailVerified: true,
     }
   });
 };

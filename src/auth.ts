@@ -25,17 +25,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: "jwt" },
   callbacks: {
     signIn: async ({ user, account }) => {
-      const customUser = user as CustomUser;
-      if (customUser && account?.provider) {
-        customUser.enabledBy = `enabledBy-${account.provider}-signIn`;
-      }
+      if (account?.provider !== 'credentials') {
+        const customUser = user as CustomUser;
+        if (customUser && account?.provider) {
+          customUser.enabledBy = `enabledBy-${account.provider}-signIn`;
+        }
 
-      // Generate and assign display name
-      if (user.email) {
-        customUser.displayName = generateDisplayName(user.email);
-        customUser.displayNameChanged = false; // Set to false on first sign-in
+        // Generate and assign display name
+        if (user.email) {
+          customUser.displayName = generateDisplayName(user.email);
+          customUser.displayNameChanged = false; // Set to false on first sign-in
+        }
       }
-
       return true;
     },
     jwt: async ({ token, user }) => {
