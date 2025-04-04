@@ -44,9 +44,9 @@ export async function sendUserVerificationEmail(userEmail: string, userName: str
       {
         verificationUrl, // maps to {{verificationUrl}} in template
         name: userName, // maps to {{name}} in template
-        // You can add more variables as needed
-        company: "TV Quotes App",
-        supportEmail: "support@tvquotes.app"
+        // // You can add more variables as needed
+        // company: "TV Quotes App",
+        // supportEmail: "support@tvquotes.app"
       }
     );
 

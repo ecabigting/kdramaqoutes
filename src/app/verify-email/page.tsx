@@ -4,14 +4,9 @@ import Link from 'next/link';
 import { verifyUserEmail } from '../../../actions/user';
 import { EmailVerificationStatus } from '@/components/ui/emailVerificationStatus';
 
-export default async function VerifyEmailPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
-  const token = Array.isArray(searchParams.token)
-    ? searchParams.token[0]
-    : searchParams.token;
+export default async function VerifyEmailPage(props: { params: Promise<{ token: string }> }) {
+
+  const { token } = await props.params
 
   if (!token) {
     return (

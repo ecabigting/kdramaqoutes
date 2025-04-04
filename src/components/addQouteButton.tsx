@@ -183,8 +183,8 @@ export default function AddQuoteButton() {
 
       {/* Form Modal */}
       {isFormVisible && (
-        <div className="fixed inset-0 bg-transparent flex items-center justify-center">
-          <div className="bg-gray-800 p-3 rounded-lg shadow-lg w-96 relative">
+        <div className="fixed inset-0 bg-transparent flex items-center justify-center shadow-2xl">
+          <div className="bg-gray-800 p-3 rounded-lg shadow-lg w-96 lg:w-[50%] relative">
             {/* Close Button */}
             <button
               onClick={() => setFormVisible(false)}
