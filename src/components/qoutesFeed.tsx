@@ -26,10 +26,10 @@ export default async function QuotesFeed() {
   return (
     <div className="flex flex-col space-y-4 p-4">
       {/* Welcome Message */}
-      {user && !user.displayNameChanged && (
+      {user.success && user.data && !user.data.displayNameChanged && (
         <div className="bg-purple-700 text-white p-4 rounded-lg flex flex-col space-y-2">
           <p className="text-white">
-            Welcome! We&apos;ve set your display name to <span className="font-bold">{user.displayName}</span>.
+            Welcome! We&apos;ve set your display name to <span className="font-bold">{user.data.displayName}</span>.
           </p>
           <div className="flex space-x-2 justify-end font-bold">
             <Link href="/settings" className=" hover:underline">

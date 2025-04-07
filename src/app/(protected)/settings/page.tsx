@@ -8,7 +8,7 @@ export default async function SettingsPage() {
   if (!session?.user?.id) redirect("/signin");
 
   const user = await getCurrentUser();
-  const currentDisplayName = user?.displayName || user?.name?.split(' ')[0] || 'Anonymous';
+  const currentDisplayName = user?.data?.displayName || user?.data?.name?.split(' ')[0] || 'Anonymous';
 
   return (
     <div className="max-w-md mx-auto p-4">

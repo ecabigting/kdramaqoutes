@@ -34,12 +34,12 @@ export function SignupForm() {
         try {
           const result = await createUser(data);
 
-          if (result?.error) {
-            setError(result.error);
+          if (!result?.success) {
+            setError(result.message);
             return;
           }
 
-          setSuccess(true);
+          setSuccess(result.success);
           reset();
         } catch (err) {
           console.log(err)

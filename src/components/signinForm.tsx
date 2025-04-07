@@ -6,9 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Spinner } from './ui/spinner';
 import { SigninFormData, signinFormSchema } from '@/types/schema/signinFormSchema';
-import { verifyCredentials } from '../../actions/user';
-import { createVerificationToken } from '../../data/user';
-import { sendUserVerificationEmail } from '../../lib/emailer';
+import { resendVerificationEmail, verifyCredentials } from '../../actions/user';
 
 export function SigninForm() {
   const [isPending, startTransition] = useTransition();
@@ -34,18 +32,13 @@ export function SigninForm() {
         try {
           const validatedData = signinFormSchema.parse(data);
           const result = await verifyCredentials(validatedData.email, validatedData.password);
-          if (!result.user) {
+          if (!result?.data) {
             setError("Invalid Email or Password!")
             return;
           }
 
-          if (!result.user?.emailVerified) {
-            const verificationToken = await createVerificationToken(result.user?.email)
-            const emailResult = await sendUserVerificationEmail(result.user?.email, result.user?.displayName, verificationToken)
-          }
-
-          if (result?.error) {
-            setError(result.error);
+          if (!result?.success) {
+            setError(result?.message);
             return;
           }
 

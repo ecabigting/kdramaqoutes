@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { updateCurrentUserDisplayName } from '../../actions/user';
+import { ActionResult } from '@/types/actionResult';
 
 export default function SettingsForm({
   initialDisplayName
@@ -11,7 +12,7 @@ export default function SettingsForm({
   initialDisplayName: string
 }) {
   const [displayName, setDisplayName] = useState(initialDisplayName);
-  const [result, setResult] = useState<{ success?: boolean; error?: string } | null>(null);
+  const [result, setResult] = useState<ActionResult<unknown | null> | undefined>(undefined);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,10 +52,10 @@ export default function SettingsForm({
           Display name updated successfully!
         </div>
       )}
-      {result?.error && (
+      {result?.success === false && (
         <div className="p-3 bg-red-900/50 text-red-400 rounded flex items-center transition-opacity duration-300">
           <XCircle className="mr-2" />
-          {result.error}
+          {result?.message}
         </div>
       )}
 
