@@ -1,5 +1,5 @@
 // ./data/user.ts
-
+"use server"
 import { db } from "@/prisma";
 import { generateVerificationToken } from "../lib/utils";
 import { addHours } from "date-fns";

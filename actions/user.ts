@@ -1,11 +1,11 @@
 // ./actions/user.ts
 "use server";
-import bcrypt from 'bcrypt';
 import { auth } from "@/auth";
 import { checkDisplayNameExists, checkEmailExists, createNewUser, createVerificationToken, findUserByEmail, getDisplayName, getUserById, getVerificationToken, setDisplayNameDismissed, updateUserDisplayName, verifyUserByToken } from "../data/user";
 import { signupFormSchema } from "@/types/schema/signupFormSchema";
 import { sendUserVerificationEmail } from '../lib/emailer';
 import { ActionResult } from '@/types/actionResult';
+import bcrypt from "bcryptjs";
 
 export const createUser = async (data: {
   displayName: string;
@@ -182,4 +182,8 @@ export const isVerificationCodeExpired = async (expires: Date) => {
   const isDevelopment = process.env.NODE_ENV === 'development';
   const expirationDate = isDevelopment ? new Date(expires) : expires;
   return new Date() > expirationDate;
+}
+
+export const getUserByEmail = async (email: string) => {
+  return await findUserByEmail(email);
 }

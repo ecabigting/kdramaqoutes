@@ -6,7 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Spinner } from './ui/spinner';
 import { SigninFormData, signinFormSchema } from '@/types/schema/signinFormSchema';
-import { resendVerificationEmail, verifyCredentials } from '../../actions/user';
+import { verifyCredentials } from '../../actions/user';
+import { signIn } from '@/auth';
 
 export function SigninForm() {
   const [isPending, startTransition] = useTransition();
@@ -42,7 +43,7 @@ export function SigninForm() {
             return;
           }
 
-          setSuccess(true);
+          await signIn("credentials", { email: validatedData.email, password: validatedData.password, redirectTo: "/" });
           reset();
         } catch (err) {
           console.log(err)
