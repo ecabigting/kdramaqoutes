@@ -5,7 +5,6 @@ import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signupFormSchema, SignupFormData } from '../types/schema/signupFormSchema';
-
 import { createUser } from '../../actions/user';
 import { Spinner } from './ui/spinner';
 import Link from 'next/link';

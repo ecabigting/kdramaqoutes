@@ -18,6 +18,8 @@ export default {
           if (!credentials?.email || !credentials?.password) {
             return null;
           }
+          console.log("--- server hit with signin from crendetials ---")
+          console.log({ credentials })
           const { getUserByEmail } = await import('../actions/user');
           const user = await getUserByEmail(credentials?.email);
           // Return user object without sensitive data

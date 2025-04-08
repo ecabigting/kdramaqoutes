@@ -3,21 +3,9 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import NextAuth from "next-auth"
 import { db } from "./prisma"
 import authConfig from "./auth.config"
-import { User } from "@prisma/client";
 import { generateDisplayName } from "../lib/utils";
+import { CustomUser } from "./types/user";
 
-/*
- *
- * CUSTOM INTERFACES
- * 
- */
-
-
-type CustomUser = User & {
-  enabledBy?: string;
-  displayName?: string;
-  displayNameChanged?: boolean;
-}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: true,

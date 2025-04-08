@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Spinner } from './ui/spinner';
 import { SigninFormData, signinFormSchema } from '@/types/schema/signinFormSchema';
 import { verifyCredentials } from '../../actions/user';
-import { signIn } from '@/auth';
+import { signIn } from 'next-auth/react';
 
 export function SigninForm() {
   const [isPending, startTransition] = useTransition();
@@ -42,7 +42,6 @@ export function SigninForm() {
             setError(result?.message);
             return;
           }
-
           await signIn("credentials", { email: validatedData.email, password: validatedData.password, redirectTo: "/" });
           reset();
         } catch (err) {
