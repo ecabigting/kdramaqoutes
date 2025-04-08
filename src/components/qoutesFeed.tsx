@@ -151,7 +151,7 @@ export default async function QuotesFeed() {
                 <div className="flex justify-between items-center mt-2">
                   {authorName && (
                     <span className="text-gray-400 text-xs">
-                      by {qoute.authorName}
+                      by {authorName}
                     </span>
                   )}
                   <button className="flex items-center space-x-1 text-purple-400 hover:text-purple-300 transition-colors">

@@ -3,6 +3,7 @@
 import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 import { publicRoutes } from "./routes";
+import { NextResponse } from "next/server";
 
 const { auth } = NextAuth(authConfig);
 
@@ -13,20 +14,20 @@ export default auth(async (req) => {
 
   // Allow auth-related routes to proceed
   if (nextUrl.pathname.startsWith("/api/auth")) {
-    return;
+    return NextResponse.next();
   }
 
   // Allow access to public routes without authentication
   if (isPublicRoute) {
-    return;
+    return NextResponse.next();
   }
 
   // Redirect to home if the user is not logged in and trying to access a protected route
   if (!isLoggedIn) {
-    return Response.redirect(new URL("/", nextUrl));
+    return NextResponse.redirect(new URL("/", nextUrl));
   }
 
-  return;
+  return NextResponse.next();
 });
 
 export const config = {

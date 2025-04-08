@@ -1,13 +1,44 @@
 // ./src/auth.ts
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import NextAuth from "next-auth"
-import { db } from "./prisma"
-import authConfig from "./auth.config"
-import { generateDisplayName } from "../lib/utils";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { db } from "./prisma";
+import Google from "next-auth/providers/google";
+import Credentials from "next-auth/providers/credentials";
+import NextAuth, { NextAuthConfig } from "next-auth";
 import { CustomUser } from "./types/user";
+import { generateDisplayName } from "../lib/utils";
+import { getUserByEmail } from "../actions/user";
+import { signinFormSchema } from "./types/schema/signinFormSchema";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  debug: true,
+export const config = {
+  providers:
+    [
+      Google,
+      Credentials({
+        name: "Credentials",
+        credentials: {
+          email: { label: "Email", type: "email" },
+          password: { label: "Password", type: "password" }
+        },
+        async authorize(credentials) {
+          // Validate credentials
+          if (!credentials?.email || !credentials?.password) {
+            return null;
+          }
+          const validatedData = signinFormSchema.parse(credentials);
+          const user = await getUserByEmail(validatedData.email);
+          if (!user) return null
+          // Return user object without sensitive data
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            displayName: user.displayName || user.name?.split(' ')[0] || 'User',
+            displayNameChanged: user.displayNameChanged || false,
+            image: user.image
+          };
+        }
+      })
+    ],
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   callbacks: {
@@ -44,5 +75,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
-  ...authConfig,
-})
+} satisfies NextAuthConfig;
+
+export const { handlers, signIn, signOut, auth } = NextAuth(config)

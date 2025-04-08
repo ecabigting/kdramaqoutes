@@ -1,13 +1,16 @@
 // ./src/app/verify-email/page.tsx
+'use server'
 import { X, Check, TriangleAlertIcon } from 'lucide-react';
 import Link from 'next/link';
 import { verifyUserEmail } from '../../../actions/user';
 import { EmailVerificationStatus } from '@/components/ui/emailVerificationStatus';
 
-export default async function VerifyEmailPage(props: { params: Promise<{ token: string }> }) {
-
-  const { token } = await props.params
-
+export default async function VerifyEmailPage({
+  searchParams,
+}: {
+  searchParams: { token?: string }
+}) {
+  const token = searchParams?.token
   if (!token) {
     return (
       <EmailVerificationStatus

@@ -36,14 +36,19 @@ export default function LayoutHeader() {
           <>
             {/* Clickable Avatar */}
             <button onClick={() => setDropdownOpen(!isDropdownOpen)}>
-              <Image
-                src={session.user?.image || "/default-avatar.png"}
-                alt="Profile"
-                width={40}
-                height={40}
-                className="rounded-full cursor-pointer"
-              />
-            </button>
+              {session.user?.image ? (
+                <Image
+                  src={session.user.image}
+                  alt="Profile"
+                  width={40}
+                  height={40}
+                  className="rounded-full cursor-pointer"
+                />
+              ) : (
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-purple-700 text-white font-bold cursor-pointer">
+                  {session.user?.displayName?.charAt(0).toUpperCase() || "?"}
+                </div>
+              )}            </button>
             {/* Dropdown */}
             {isDropdownOpen && (
               <div className="absolute right-3 top-15 bg-white text-black rounded-lg shadow-lg">
@@ -52,6 +57,7 @@ export default function LayoutHeader() {
                     <Link
                       href="/settings"
                       className="block px-4 py-2 hover:bg-gray-100"
+                      onClick={() => setDropdownOpen(false)}
                     >
                       Settings
                     </Link>

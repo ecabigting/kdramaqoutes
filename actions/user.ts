@@ -6,6 +6,7 @@ import { signupFormSchema } from "@/types/schema/signupFormSchema";
 import { sendUserVerificationEmail } from '../lib/emailer';
 import { ActionResult } from '@/types/actionResult';
 import bcrypt from "bcryptjs";
+import { UserProfile } from "@/types/user";
 
 export const createUser = async (data: {
   displayName: string;
@@ -96,10 +97,6 @@ export const dismissDisplayNamePrompt = async (): Promise<ActionResult<unknown>>
   session.user.displayNameChanged = true;
   return { success: true, message: "", data: await setDisplayNameDismissed(session.user.id) };
 };
-
-// export const checkDisplayNameAvailable = async (displayName: string, currentUserId: string): Promise<ActionResult<unknown>> => {
-//   return { success: false, message: "", data: await getDisplayName(displayName, currentUserId) };
-// }
 
 export const verifyCredentials = async (email: string, password: string): Promise<ActionResult<unknown>> => {
   try {

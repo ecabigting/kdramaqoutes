@@ -60,7 +60,7 @@ export const createNewUser = async ({
       email,
       name: displayName,
       displayName,
-      displayNameChanged: false,
+      displayNameChanged: true,
       isEnabled: true,
       enabledAt: new Date(),
       password: password,
