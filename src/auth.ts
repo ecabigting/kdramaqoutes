@@ -6,7 +6,6 @@ import authConfig from "./auth.config"
 import { generateDisplayName } from "../lib/utils";
 import { CustomUser } from "./types/user";
 
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: true,
   adapter: PrismaAdapter(db),
