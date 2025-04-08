@@ -27,18 +27,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <SessionProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <SessionProvider>
           <LayoutHeader />
           {children}
           <AddQuoteButton />
           <LayoutFooter />
-        </body>
-      </html>
-    </SessionProvider>
-
+        </SessionProvider>
+      </body>
+    </html>
   );
 }
