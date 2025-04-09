@@ -4,6 +4,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/ecabigting/kdramaqoutes/api/routes"
+	"github.com/ecabigting/kdramaqoutes/api/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -20,7 +22,8 @@ func main() {
 	if port == "" {
 		port = "8080" // Default to port 8080 if not set
 	}
-
+	// Initialize the database connection
+	utils.ConnectDatabase()
 	// Initialize Gin router
 	router := gin.Default()
 
@@ -30,7 +33,7 @@ func main() {
 			"message": "pong",
 		})
 	})
-
+	routes.RegisterUserRoutes(router) // Register user-related routes
 	// Run the server
 	log.Printf("Server running on port %s", port)
 	router.Run(":" + port)

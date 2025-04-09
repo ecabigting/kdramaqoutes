@@ -11,7 +11,6 @@ import { signinFormSchema } from "./types/schema/signinFormSchema";
 import authConfig from "./auth.config";
 
 export const config = {
-  adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   callbacks: {
     signIn: async ({ user, account }) => {
