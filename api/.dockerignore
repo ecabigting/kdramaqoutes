@@ -1,0 +1,10 @@
+# Exclude files and folders that shouldn't be in the Docker image
+.git
+node_modules
+vendor
+*.log
+*.env
+.DS_Store
+.idea
+.vscode
+tmp/

@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080" # Map port 8080 on the host to port 8080 in the container
+    volumes:
+      - .:/app # Mount the current directory into the container
+      - /app/tmp # Exclude temp files
+    environment:
+      - AIR_GO=1 # Ensure air uses Go  
