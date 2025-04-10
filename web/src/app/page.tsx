@@ -1,4 +1,4 @@
-import QuotesFeed from "@/components/qoutesFeed";
+// import QuotesFeed from "@/components/qoutesFeed";
 
 
 export default async function Home() {
@@ -6,7 +6,7 @@ export default async function Home() {
     <div className="min-h-screen bg-background text-foreground">
 
       <main className="max-w-2xl mx-auto p-4">
-        <QuotesFeed />
+        {/* <QuotesFeed /> */}
       </main>
     </div>
   );

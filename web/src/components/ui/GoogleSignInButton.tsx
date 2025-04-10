@@ -1,9 +1,11 @@
 // ./src/app/components/ui/googlesigninbutton.tsx
 
+import { signIn } from "@/auth";
+
 export function GoogleSignInButton() {
   async function handleGoogleSignIn() {
     'use server';
-    const { signIn } = await import('@/auth');
+    // const { signIn } = await import('@/auth');
     await signIn('google', { redirectTo: '/' });
   }
 

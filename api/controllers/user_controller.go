@@ -12,6 +12,7 @@ import (
 type SyncUserRequest struct {
 	User    models.User    `json:"user"`    // User data passed from the Next.js app
 	Account models.Account `json:"account"` // Account data passed from the Next.js app
+	Profile models.Profile `json:"profile"`
 }
 
 // SyncUser is the controller function for the `user/sync` endpoint
@@ -27,6 +28,7 @@ func SyncUser(c *gin.Context) {
 	// Step 2: Extract User and Account data from the request body
 	user := requestBody.User
 	account := requestBody.Account
+	profile := requestBody.Profile
 
 	// Step 3: Start a database transaction
 	tx := utils.DB.Begin()
@@ -75,9 +77,33 @@ func SyncUser(c *gin.Context) {
 		}
 	}
 
-	// Step 6: Commit the database transaction if all operations succeed
+	// Step 6 : Check if the profile already exist in the database
+	var existingProfile models.Profile
+	if err := tx.Where("sub = ?", profile.SUB).First(&existingProfile).Error; err == nil {
+		// If the profile exists, update its information
+		existingProfile.Name = profile.Name
+		existingProfile.Picture = profile.Picture
+		existingProfile.Email = profile.Email
+		existingProfile.EmailVerified = profile.EmailVerified
+		existingProfile.GivenName = profile.GivenName
+		existingProfile.FamilyName = profile.FamilyName
+		if err := tx.Save(&existingProfile).Error; err != nil {
+			tx.Rollback() // Rollback the transaction in case of an error
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
+			return
+		}
+	} else {
+		// If the profile doesn't exist, create a new profile
+		if err := tx.Create(&profile).Error; err != nil {
+			tx.Rollback() // Rollback the transaction in case of an error
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create profile"})
+			return
+		}
+	}
+
+	// Step 7: Commit the database transaction if all operations succeed
 	tx.Commit()
 
-	// Step 7: Return a success response
-	c.JSON(http.StatusOK, gin.H{"message": "User and account synchronized successfully", "user": user, "account": account})
+	// Step 8: Return a success response
+	c.JSON(http.StatusOK, gin.H{"message": "User, account and profiled synchronized successfully", "user": user, "account": account, "profile": profile})
 }

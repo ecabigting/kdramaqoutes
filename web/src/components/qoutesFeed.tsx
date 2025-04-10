@@ -5,11 +5,12 @@ import { fetchEnabledQoutes } from "../../actions/qoutes";
 import { dismissDisplayNamePrompt, getCurrentUser } from "../../actions/user";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 
 export default async function QuotesFeed() {
   const qoutes = await fetchEnabledQoutes();
   const user = await getCurrentUser();
-
+  const sess = await auth()
   // Array of background colors for the cards
   const cardBackgrounds = [
     "bg-gray-800",
@@ -25,6 +26,7 @@ export default async function QuotesFeed() {
 
   return (
     <div className="flex flex-col space-y-4 p-4">
+      {JSON.stringify(sess)}
       {/* Welcome Message */}
       {user.success && user.data && !user.data.displayNameChanged && (
         <div className="bg-purple-700 text-white p-4 rounded-lg flex flex-col space-y-2">
